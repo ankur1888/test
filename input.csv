@@ -1,0 +1,4 @@
+insuranceId,customerName,customerId,customerEmail,amountPaid,amountTotal
+IN0005,ABC,CI12345,ankur.id75@gmail.com,2000,5000
+IN0006,ABD,CI12346,ankur.id75@gmail.com,5050,5050
+IN0007,ABE,CI12347,ankur.id75@gmail.com,2500,7000

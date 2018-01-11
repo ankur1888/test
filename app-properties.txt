@@ -1,0 +1,8 @@
+Host=smtp.gmail.com
+ Port=587
+ 
+ User=ankur.id75%40gmail.com
+ Password=senderpassword
+
+ To=ankur.id75%40gmail.com
+ From=ankur.id75%40gmail.com

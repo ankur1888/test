@@ -1,0 +1,11 @@
+<!DOCTYPE html> 
+<html> 
+<body> 
+<h1>Dear #[payload.customerName],</h1> 
+<p>Your Insurance Policy Id No. <b>#[payload.insuranceId]</b> associated with the customer Id No. <b>#[payload.customerId]</b> is due for payment.</h1> 
+<p>Your due amount is <b>#[payload.amountDue]</b>.</p> 
+<p>Kindly pay the due amount before #[payload.dueDate]</p>  
+<p>Regards,<p> 
+<p>ABC Insurance Co. </p> 
+</body> 
+</html>

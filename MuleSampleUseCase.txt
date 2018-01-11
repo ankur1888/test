@@ -1,0 +1,31 @@
+MULE Sample Use Case:
+
+In this sample MULE API, 
+1.Input is a CSV file containing sample insurance policies data of an insurance company which is stored in the local directory is converted to the collection of Maps using the DataWeave transformer.
+2.Process each record of map and filer the records of insurance whose due amount is remaining and sent an email to associated customer email address using the SMTP connector. 
+3.The DataWeave also computes the due amount by subtracting amount paid from the total amount. 
+4.This sample has been configured for Google's gmail.
+
+Set Up and Run this Example:
+
+1.Open the sample mule project in Anypoint Studio.
+
+2. Create a folder called input under src/main/resources and paste the input.csv file in the input folder. 
+
+3. Edit the path field in the file connector to: Path=src/main/resources/input
+
+4. Configure the mule-app.properties as follows:
+
+-- No need to change
+ Host=smtp.gmail.com
+ Port=587
+ 
+-- please change it to your account
+ User=senderemailid%40gmail.com
+ Password=senderpassword
+ To=receiveremailid@gmail.com
+ From=senderemailid@gmail.com
+
+5. Run the project as a Mule application.
+
+6. Login to <receiveremailid@gmail.com> to verify if the proper email was received. 
