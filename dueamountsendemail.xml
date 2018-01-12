@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:context="http://www.springframework.org/schema/context" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:smtp="http://www.mulesoft.org/schema/mule/smtp" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/smtp http://www.mulesoft.org/schema/mule/smtp/current/mule-smtp.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <smtp:gmail-connector doc:name="Gmail" name="Gmail" validateConnections="true"/>
+    <file:connector name="File" autoDelete="false" streaming="true" validateConnections="true" doc:name="File"/>
+    <file:connector name="File1" autoDelete="true" streaming="true" validateConnections="true" doc:name="File" outputAppend="true"/>
+    <flow name="sendEmailInsuranceDueAmount">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/csv" doc:name="HTTP"/>
+        <parse-template location="D:\Users\ajain90\Desktop\InsuranceTaskSample\input.csv" doc:name="Parse Template"/>
+        <dw:transform-message doc:name="Transform CSV to Map" metadata:id="84d175de-b3c6-4480-af9d-150e736f051e">
+            <dw:input-payload doc:sample="list_csv.csv"/>
+            <dw:set-payload><![CDATA[%dw 1.0
+%output application/java
+---
+
+payload map {
+	insuranceId: $.insuranceId,
+	customerName: $.customerName,
+	customerId: $.customerId,
+	customerEmail: $.customerEmail,
+	amountDue: ($.amountTotal - $.amountPaid ) as :number,
+	//currentDate: (now as :localdatetime {format : "dd/MM/yyyy HH:mm:ss"})as :string {format : "dd/MM/yyyy HH:mm:ss"}, 
+	//dueDate: ((flowVars.currentDate) ++ |P7D|)as :string {format: "yyyy-MM-dd"} 
+	dueDate: (now + |P7D|)  as :string {format: "yyyy-MM-dd"}
+	//dueDate: flowVars['currentDate']	
+}]]></dw:set-payload>
+            <dw:set-variable variableName="currentDate"><![CDATA[%dw 1.0
+%output application/java
+---
+currentDate: now as :string {format: "yyyy-MM-dd"}]]></dw:set-variable>
+        </dw:transform-message>
+		<foreach collection="#[payload]" doc:name="For Each">
+            <expression-filter expression="#[payload['insuranceId']== flowVars.id]" doc:name="Expression"/>
+            <logger message= "Only amount greater than zero records are left #[flowVars.id]" level="INFO" doc:name="Logger"/>
+            <set-variable variableName="insuranceId" value="#[payload.insuranceId]" doc:name="Variable"/>
+            <set-payload doc:name="Set Payload" value="&lt;!DOCTYPE html&gt;  &lt;html&gt;  &lt;body&gt;  &lt;h1&gt;Dear #[payload.customerName],&lt;/h1&gt;  &lt;p&gt;Your Insurance Policy Id No. &lt;b&gt;#[payload.insuranceId]&lt;/b&gt; associated with the customer Id No. &lt;b&gt;#[payload.customerId]&lt;/b&gt; is due for payment.&lt;/h1&gt;  &lt;p&gt;Your due amount is &lt;b&gt;#[payload.amountDue]&lt;/b&gt;.&lt;/p&gt;  &lt;p&gt;Kindly pay the due amount before &lt;b&gt;#[payload.dueDate]&lt;/b&gt;&lt;/p&gt;   &lt;p&gt;Regards,&lt;p&gt;  &lt;p&gt;ABC Insurance Co. &lt;/p&gt;  &lt;/body&gt;  &lt;/html&gt; "/>
+<!--             <smtp:outbound-endpoint connector-ref="Gmail" doc:name="Send an email via SMTP" from="${mail.from}" host="${smtp.host}" password="${smtp.password}" port="587" responseTimeout="10000" subject="${mail.subject}" to="${mail.to}" user="${smtp.user}"/> -->
+            <file:outbound-endpoint responseTimeout="10000" doc:name="File" connector-ref="File1" outputPattern="output#[flowVars.insuranceId].html" path="D:\Users\ajain90\Desktop\InsuranceTaskSample"/>
+		<logger doc:name="MainSentAll" level="INFO" message="Mail Sent to ${mail.to}"/> 
+		</foreach>
+        <logger doc:name="MainSentAll" level="INFO" message="Mail Sent to all"/>   
+    </flow>
+</mule>

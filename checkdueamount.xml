@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration" doc:name="HTTP Request Configuration"/>
+    <http:request-config name="HTTP_Request_Configuration1" host="localhost" port="8081" doc:name="HTTP Request Configuration"/>
+    <flow name="checkdueamountFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/dueAmt" doc:name="HTTP"/>
+        <set-payload value="&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;body&gt;
+&lt;h1&gt; Insurance Policy Due Amount Retrival&lt;/h1&gt;
+&lt;form action=&quot;/action&quot;&gt;
+ 
+  InsuranceId:&lt;br&gt;
+  &lt;input type=&quot;text&quot; name=&quot;insuranceId&quot;&gt;
+  &lt;br&gt;&lt;br&gt;
+  &lt;input type=&quot;submit&quot; value=&quot;Submit&quot;&gt;
+&lt;/form&gt; 
+
+&lt;p&gt;If you click the &quot;Submit&quot; button, you wil able to know your due amount against your insurance policy number entered&quot;.&lt;/p&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;
+" doc:name="Set Payload"/>
+    </flow>
+    <flow name="checkdueamountFlow1">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/action" doc:name="HTTP"/>
+        <set-variable variableName="id" value="#[message.inboundProperties.'http.query.params'.insuranceId]" doc:name="Variable"/>
+        <http:request config-ref="HTTP_Request_Configuration1" path="/csv" method="GET" doc:name="HTTP"/>
+        <set-payload value="HELLO #[flowVars.id]" doc:name="Set Payload"/>
+    </flow>
+</mule>
