@@ -8,6 +8,8 @@ OR
 OR#
 [payload.resultSet1[0]['XML_F5RYI-11YTR']]
 
+* UNCHECK STREAMING IN DATABASE CONNECTOR TO AVOID READING RESULTSET ITERATOR.
+
 ################### SPLITTING A FILE 
 
 <configuration doc:name="Configuration">
@@ -28,3 +30,56 @@ OR#
 1. Add MAPS to XML 
 OR
 2. OBJECT to JSON
+
+######################### AFTER HTTP CONNECTOR DATA TYPE
+1. Add Byte Array to String transformer after the HTTP connector. 
+It will convert the BufferInputStream to a String, so you can get/read/log the XML data as you need.
+
+<byte-array-to-string-transformer doc:name="Byte Array to String"/>
+
+OR
+
+2. Add Transform Message and use output as application/java in order to read the elements of payload from HTTP Requester.
+
+######################## INSIDE HTTP REQUEST CONNECTOR
+1. when need to call rest api in between of flow
+host- host of api
+port - 80 (default for HTTP) OR 81 (for HTTPS)
+basePath - section after host/. See (host/basePath)
+Sample-
+<http:request-config name="HTTP_Request_Configuration" host="api.email-validator.net" port="80" basePath="/api" doc:name="HTTP Request Configuration"/>
+
+2. Setting query parameters in HTTP Request from inbound properties-
+<http:query-param paramName="EmailAddress" value="#[message.inboundProperties.'http.query.params'.emailAddress]"/>
+
+######################### INSIDE CHOICE EQUALS STATED AS
+1.
+<choice doc:name="Choice">
+  <when expression="#[!message.inboundProperties.GROUPMEMBERSHIP.cn.equals('ZZZ-XXXX-Write-Users')]">
+    <!-- DO SOMETHING -->
+  </when
+  <otherwise>
+   <!-- DO SOMETHING ELSE -->
+  </otherwise>
+</choice>
+
+2. #[flowVars.result.'status' == 119] OR  // NOTE HERE status is integer.
+#[payload.'status' == 119]
+
+###################### INSIDE MESSAGE ENRICHER
+1. HTTP Request inside message enricher
+Use target as flowVars and it will create it. So no need to create a variable earlier.
+Use Source as payload.
+
+Add source and target in lower section of message enricher using plus sign. Do not write in upper section
+Sample
+<enricher doc:name="Message Enricher" >
+          <http:request config-ref="HTTP_Request_Configuration" path="/verify" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="EmailAddress" value="#[message.inboundProperties.'http.query.params'.emailAddress]"/>
+            </http:request-builder>
+        </http:request>
+            <enrich source="#[payload]" target="#[flowVars.recordFound]"/>
+        </enricher>
+
+
