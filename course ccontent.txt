@@ -1,0 +1,21 @@
+MULESOFT TRAINING CONTENT:
+
+Introduction to ESB and Mule
+Introduction to Anypoint Platform and API LEd Conectivity
+Anypoint Studio and worspace setup
+Mule API Flow understanding
+Mule Message Structure
+Consuming REST API with RAML
+Dataweave and MEL
+Scatter Gather, Choice, For Each
+Database connector
+File Connector
+Exception Handling
+
+One Practical Project.
+
+Duration : 20-25 Days
+
+
+
+
