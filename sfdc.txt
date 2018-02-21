@@ -1,0 +1,7 @@
+https://github.com/mulesoft/template-db2sfdc-user-migration/blob/3.7/src/main/app/businessLogic.xml
+
+ADD three libraries:
+1.wsc-20.jar
+2.mule-module-sfdc-6.2.6.jar
+3.force-partner-api-23.0.0
+
