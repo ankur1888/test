@@ -1,0 +1,120 @@
+https://github.com/mulesoft/anypoint-examples
+
+################### SPLITTING A FILE 
+
+<configuration doc:name="Configuration">
+<expression-language autoResolveVariables="true">
+    <import class="org.mule.util.StringUtils" />
+</expression-language>
+</configuration>
+
+<flow name="muleutilFlow6">
+<file:inbound-endpoint path="C:\path\input sample" connector-ref="File" responseTimeout="10000" doc:name="File"/>
+<object-to-string-transformer />
+<splitter expression="#[StringUtils.split(message.payload, '\n\r')]" doc:name="Splitter" />
+    <logger message="Line - #[payload]" level="INFO" doc:name="Logger"/>
+	
+
+############READ VALUE from resultset iterator from database:
+
+#[message.payload.get(0)['XML_F5RYI-11YTR']]
+OR
+#[payload.get(0)['XML_F5RYI-11YTR']]
+OR
+#[payload[0]['XML_F5RYI-11YTR']]
+OR#
+[payload.resultSet1[0]['XML_F5RYI-11YTR']]
+
+* UNCHECK STREAMING IN DATABASE CONNECTOR TO AVOID READING RESULTSET ITERATOR.
+	
+####################### After Database connector or database connector return type
+
+1. Add MAPS to XML 
+OR
+2. OBJECT to JSON
+
+######################### AFTER HTTP CONNECTOR DATA TYPE
+1. Add Byte Array to String transformer after the HTTP connector. 
+It will convert the BufferInputStream to a String, so you can get/read/log the XML data as you need.
+
+<byte-array-to-string-transformer doc:name="Byte Array to String"/>
+
+OR
+
+2. Add Transform Message and use output as application/java in order to read the elements of payload from HTTP Requester.
+
+######################## INSIDE HTTP REQUEST CONNECTOR
+1. when need to call rest api in between of flow
+host- host of api
+port - 80 (default for HTTP) OR 81 (for HTTPS)
+basePath - section after host/. See (host/basePath)
+Sample-
+<http:request-config name="HTTP_Request_Configuration" host="api.email-validator.net" port="80" basePath="/api" doc:name="HTTP Request Configuration"/>
+
+2. Setting query parameters in HTTP Request from inbound properties-
+<http:query-param paramName="EmailAddress" value="#[message.inboundProperties.'http.query.params'.emailAddress]"/>
+
+######################### INSIDE CHOICE EQUALS STATED AS
+1.
+<choice doc:name="Choice">
+  <when expression="#[!message.inboundProperties.GROUPMEMBERSHIP.cn.equals('ZZZ-XXXX-Write-Users')]">
+    <!-- DO SOMETHING -->
+  </when
+  <otherwise>
+   <!-- DO SOMETHING ELSE -->
+  </otherwise>
+</choice>
+
+2. #[flowVars.result.'status' == 119] OR  // NOTE HERE status is integer.
+#[payload.'status' == 119]
+
+###################### INSIDE MESSAGE ENRICHER
+1. HTTP Request inside message enricher
+Use target as flowVars and it will create it. So no need to create a variable earlier.
+Use Source as payload.
+
+Add source and target in lower section of message enricher using plus sign. Do not write in upper section
+Sample
+<enricher doc:name="Message Enricher" >
+          <http:request config-ref="HTTP_Request_Configuration" path="/verify" method="GET" doc:name="HTTP">
+            <http:request-builder>
+                <http:query-param paramName="EmailAddress" value="#[message.inboundProperties.'http.query.params'.emailAddress]"/>
+            </http:request-builder>
+        </http:request>
+            <enrich source="#[payload]" target="#[flowVars.recordFound]"/>
+        </enricher>
+		
+######################### IN MUNIT
+1. MOCKING ---> Return payload should be as : 
+	(a)#['your actual payload'] - If return payload plain text then 
+	(b)#[[your actual payload ]] - If return payload object either java or json or etc.. Put logger after the component in main flow and take its payload and put inside the #[] as it is with square brackets.
+
+2. SET MESSAGE ---> 
+	(a) If payload then write payload #[]
+	(b) If inbound properties then write in properties as Name-http.request(or any inbound property), Value - Exact Value you want to pass, Type - Select INBOUND.
+	
+######################################## VM CONNECTOR
+1. Queue Path and connector config in outbound and inbound should be same.
+2. Instead of Path in outbound vm connector we can also mention address also like vm://vm-path
+3. VM transport does not pass inbound properties. So inbound properties to be set in variable to pass to next flow through vm transport.
+
+#####################################DATAWEAVE FILTER
+
+payload filter ($.Action == 'I')
+
+################################### DATABASE CONNECTOR(OUTBOUNT) - INSERTION MULTIPLE VALUES USING ONE INSERT QUERY
+Reference: https://sayanrocksblog.wordpress.com/2017/02/15/first-blog-post/
+
+Since, Database connector: INPUT - SIngle JavaObject, OUTPUT - No of queries affected (in case of INSERT, UPDATE and DELETE)
+STEP1: Conversion of dataformat into Java Object
+So if input is list of JSON it should be converted to list/map to Object. Converted as two ways:
+a. Use JSON To Object Transformer : (java.util.List)
+b. User Transform Message : (%output application/java) and (payload map) for itertation of map
+
+STEP2: ITERATING THE LIST OF OBJECTS IN DATABASE CONNECTOR
+Now the Input is list of java objects. There are two ways of iterating in database connector:
+a. TRADITIONAL : BulkMode: False(Uncheck), Query: Parametrized, Opertaion: Insert. Use the for-each scope over the database connector. Write Insert query as: insert into parttime_employee values (#[payload.id], #[payload.name], #[payload.designation], #[payload.salary], #[payload.contact_period])
+b. BULK EXECUTE: BulkMode: True(Check), Query: Parametrized, Opertaion: Insert. No need to use for-each scope now. Improves performance for large data.
+
+####################################
+

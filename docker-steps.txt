@@ -1,0 +1,36 @@
+DOCKER INSTALLATION ON YOUR HOST MACHINE STEPS:
+
+1.Install VM on your local host machine(like ubuntu box)[Directly install vm on machine and it will brovide its own cmd box for writing commands]
+Then, Update the packages in <ubuntu box> using command on ubuntu box-
+	sudo apt-get update ----> Press Enter
+then, <Enter Password> 
+
+In the last it shows....DONE
+
+2. Before installing docker we need to install Linux VM on your machine using commands in VM-CMD.
+	sudo apt-get install linux-image-extra-$(uname -r) linux-image-extra-virtual ----> Press Enter
+	then, Press Y in between, 
+In the last it shows....DONE and version of linux-image-extra-virtual
+
+3. Now Install docker, using commands in VM-CMD
+	sudo apt-get install docker-engine  ----> Press Enter
+In the last it shows....docker start/running and Processing triggers....(some ip addresss)
+
+4. Now start the docker, using commands in VM-CMD
+	sudo service docker start	----> Press Enter
+In the last it shows....running: docker
+
+5. Pull the image from docker hub(various images are placed at https://hub.docker.com) - using commands in VM-CMD
+	sudo docker pull <image-name> ----> Press Enter [First it will look in local repository, if it does find it then pulls from docker hub]
+In the last it shows....Status: Downloaded ......<image-name>: latest
+
+6. Run the container for image file which we dowloaded in previous step, using commands in VM-CMD
+	sudo docker run -it <image-name>  ----> Press Enter
+In the last it shows...[root@....]# - Now We are into the container of the image.
+
+7. To exit from container just type --- exit after [root@....]#
+
+
+
+
+	
