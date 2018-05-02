@@ -1,6 +1,15 @@
 %dw 1.0
+
 %output application/json 
+
+
+
 %var common = ((payload -- (payload distinctBy $.ORGLEVEL_ID)) map $.ORGLEVEL_ID)
-%var rem = (payload map $.ORGLEVEL_ID) --  common
+
+%var rem = (payload map $.ORGLEVEL_ID) --  common
+
+
+
 ---
-payload filter (((common contains ($.ORGLEVEL_ID)) and ($.ORGLEVEL_ID == $.PRODUCTID))) or ( (rem contains ($.ORGLEVEL_ID)) and ($.ORGLEVEL_ID != $.PRODUCTID)) orderBy $.ORGLEVEL_ID 
+
+payload filter  (((common contains ($.ORGLEVEL_ID)) and ($.ORGLEVEL_ID == $.PRODUCTID) )) or ( (rem contains ($.ORGLEVEL_ID)) and ($.ORGLEVEL_ID != $.PRODUCTID)) or ( (rem contains ($.ORGLEVEL_ID)) and ($.ORGLEVEL_ID == $.PRODUCTID)) orderBy $.ORGLEVEL_ID 
