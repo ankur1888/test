@@ -1,0 +1,5 @@
+IN  MULE 3.8 - INPUT and OUTPUT AS FIXEDW
+%dw 1.0%output text/plain schemaPath = "out.ffd"---payload map ((payload01 , indexOfPayload01) -> { INST: payload01.inst, CC: payload01.country, ID: payload01.batch})
+----------------------------------------------------------------------------------------------------------------------------------------
+IN MULE 4.1.1 - INPUT and OUTPUT AS FIXEDW
+%dw 2.0output application/flatfile  schemaPath = "out.ffd"---payload map ((payload01 , indexOfPayload01) -> { INST: payload01.inst, CC: payload01.country, ID: payload01.batch})
